@@ -1,0 +1,12 @@
+{
+  "images" : [
+    {
+      "filename" : "cloutgrid_logo_dp_512x512.png",
+      "idiom" : "universal"
+    }
+  ],
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  }
+}
