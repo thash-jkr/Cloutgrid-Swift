@@ -27,6 +27,8 @@ struct Empty: View {
                     .foregroundStyle(.secondary)
                     .font(.callout)
             }
+            
+            Spacer()
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
     }

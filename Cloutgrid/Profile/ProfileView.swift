@@ -6,8 +6,11 @@
 //
 
 import SwiftUI
+import Awesome
 
 struct ProfileView: View {
+    @EnvironmentObject var deepLinkManager: DeepLinkManager
+    
     @Environment(AuthManager.self) private var auth
     @Environment(ProfileManager.self) private var profile
     
@@ -34,9 +37,19 @@ struct ProfileView: View {
         Button {
             selectedTab = tab
         } label: {
-            Image(systemName: iconName(for: tab))
-                .font(.system(size: 20))
-                .foregroundStyle(selectedTab == tab ? Color.second : Color.first)
+            if tab == .instagram {
+                Awesome.Brand.instagram.image
+                    .size(30)
+                    .foregroundColor(selectedTab == tab ? .second : .first)
+            } else if tab == .youtube {
+                Awesome.Brand.youtube.image
+                    .size(30)
+                    .foregroundColor(selectedTab == tab ? .second : .first)
+            } else {
+                Image(systemName: iconName(for: tab))
+                    .font(.system(size: 20))
+                    .foregroundStyle(selectedTab == tab ? Color.second : Color.first)
+            }
         }
         .frame(maxWidth: .infinity)
     }
@@ -69,34 +82,34 @@ struct ProfileView: View {
             
             tabPicker
             
-            switch selectedTab {
-            case .posts:
-                PostGrid(posts: profile.posts, path: $profilePath)
-            case .instagram:
-                Instagram()
-            case .youtube:
-                Youtube()
-            case .collabs:
-                PostGrid(posts: profile.collabs, path: $profilePath)
-            }
+//            switch selectedTab {
+//            case .posts:
+//                PostGrid(posts: profile.posts, path: $profilePath)
+//            case .instagram:
+//                Instagram()
+//            case .youtube:
+//                Youtube()
+//            case .collabs:
+//                PostGrid(posts: profile.collabs, path: $profilePath)
+//            }
             
-//                ZStack(alignment: .top) {
-//                    PostGrid(posts: profile.posts, path: $profilePath)
-//                        .opacity(selectedTab == .posts ? 1 : 0)
-//                        .allowsHitTesting(selectedTab == .posts)
-//
-//                    Instagram()
-//                        .opacity(selectedTab == .instagram ? 1 : 0)
-//                        .allowsHitTesting(selectedTab == .instagram)
-//
-//                    Youtube()
-//                        .opacity(selectedTab == .youtube ? 1 : 0)
-//                        .allowsHitTesting(selectedTab == .youtube)
-//
-//                    PostGrid(posts: profile.posts, path: $profilePath)
-//                        .opacity(selectedTab == .collabs ? 1 : 0)
-//                        .allowsHitTesting(selectedTab == .collabs)
-//                }
+            ZStack(alignment: .top) {
+                PostGrid(posts: profile.posts, path: $profilePath)
+                    .opacity(selectedTab == .posts ? 1 : 0)
+                    .allowsHitTesting(selectedTab == .posts)
+
+                Instagram()
+                    .opacity(selectedTab == .instagram ? 1 : 0)
+                    .allowsHitTesting(selectedTab == .instagram)
+
+                Youtube()
+                    .opacity(selectedTab == .youtube ? 1 : 0)
+                    .allowsHitTesting(selectedTab == .youtube)
+
+                PostGrid(posts: profile.collabs, path: $profilePath)
+                    .opacity(selectedTab == .collabs ? 1 : 0)
+                    .allowsHitTesting(selectedTab == .collabs)
+            }
         }
         .refreshable {
             await auth.fetchProfile(username: auth.user!.profile.username)
@@ -104,6 +117,21 @@ struct ProfileView: View {
         }
         .task {
             await profile.fetchPosts(username: auth.user?.profile.username ?? "")
+        }
+        .onChange(of: deepLinkManager.profileAction) { oldValue, newValue in
+            if newValue == .connectInstagram {
+                selectedTab = .instagram
+                
+                DispatchQueue.main.async {
+                    deepLinkManager.profileAction = nil
+                }
+            } else if newValue == .connectYoutube {
+                selectedTab = .youtube
+                
+                DispatchQueue.main.async {
+                    deepLinkManager.profileAction = nil
+                }
+            }
         }
     }
 }
@@ -113,4 +141,5 @@ struct ProfileView: View {
         .environment(AuthManager())
         .environment(ProfileManager())
         .environment(HomeManager())
+        .environmentObject(DeepLinkManager())
 }

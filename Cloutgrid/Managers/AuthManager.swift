@@ -13,18 +13,20 @@ class AuthManager {
     let keychain = KeychainSwift()
     
     var user: UserContainer?
+    var access: String?
     var isAuth: Bool = false
     var isLoading: Bool = false
     var errorMessage: String?
     var type: String?
     
     init() {
-        if let _ = keychain.get("access"),
+        if let accessToken = keychain.get("access"),
            let userData = UserDefaults.standard.data(forKey: "user"),
            let decodedUser = try? JSONDecoder().decode(UserContainer.self, from: userData) {
             self.user = decodedUser
             self.type = UserDefaults.standard.string(forKey: "type") ?? "creator"
             self.isAuth = true
+            self.access = accessToken
         }
     }
     

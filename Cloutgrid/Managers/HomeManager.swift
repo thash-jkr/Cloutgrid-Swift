@@ -6,17 +6,12 @@
 //
 
 import SwiftUI
-import KeychainSwift
 
 @Observable
 class HomeManager {
-    let keychain = KeychainSwift()
-    
     var notifications: [NotificationModel] = []
-    
     var posts: [PostModel] = []
     var nextCursor: String?
-    
     var comments: [CommentModel] = []
     
     var isLoading: Bool = false

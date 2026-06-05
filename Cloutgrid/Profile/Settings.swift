@@ -40,28 +40,6 @@ struct Settings: View {
         }
     }
     
-    private func webContent(url: URL) -> some View {
-        NavigationStack {
-            WebView(url: url)
-                .ignoresSafeArea(edges: .bottom)
-                .toolbar {
-                    ToolbarItem(placement: .topBarLeading) {
-                        Button {
-                            sheetURL = nil
-                        } label: {
-                            Image(systemName: "xmark")
-                        }
-                    }
-                    
-                    ToolbarItem(placement: .topBarTrailing) {
-                        ShareLink(item: url) {
-                            Image(systemName: "square.and.arrow.up")
-                        }
-                    }
-                }
-        }
-    }
-    
     var body: some View {
         List {
             settingsItem(icon: "lifepreserver", body: "Help") {
@@ -159,7 +137,24 @@ struct Settings: View {
             }
         }
         .sheet(item: $sheetURL) { urlString in
-            webContent(url: URL(string: urlString.rawValue)!)
+            NavigationStack {
+                BrowserView(url: URL(string: urlString.rawValue)!)
+                    .toolbar {
+                        ToolbarItem(placement: .topBarLeading) {
+                            Button {
+                                sheetURL = nil
+                            } label: {
+                                Image(systemName: "xmark")
+                            }
+                        }
+                        
+                        ToolbarItem(placement: .topBarTrailing) {
+                            ShareLink(item: sheetURL?.rawValue ?? "") {
+                                Image(systemName: "square.and.arrow.up")
+                            }
+                        }
+                    }
+            }
         }
     }
         

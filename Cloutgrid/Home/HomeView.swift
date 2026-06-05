@@ -61,10 +61,18 @@ struct HomeView: View {
                             )
                         }
                     }
+                    
+                    Color.clear
+                        .frame(height: 1)
+                        .onAppear {
+                            Task {
+                                await home.fetchPosts(isFirstPage: false)
+                            }
+                        }
                 }
                 .scrollPosition($scrollY)
                 .refreshable {
-                    await home.fetchPosts()
+                    await home.fetchPosts(isFirstPage: true)
                 }
             } else if home.isLoading {
                 FeedLoading()

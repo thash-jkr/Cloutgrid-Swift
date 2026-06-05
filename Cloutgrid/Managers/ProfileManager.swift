@@ -11,8 +11,6 @@ import SwiftUI
 
 @Observable
 class ProfileManager {
-    var auth: AuthManager?
-    
     var posts: [PostModel] = []
     var collabs: [PostModel] = []
     
@@ -39,10 +37,6 @@ class ProfileManager {
             
             if other {
                 self.otherProfile = response
-            } else {
-                await MainActor.run {
-                    auth?.updateUser(profile: response)
-                }
             }
             
             self.isLoading = false
@@ -59,6 +53,8 @@ class ProfileManager {
         self.otherPosts = []
         
         do {
+//            try await Task.sleep(for: .seconds(2))
+            
             let response: [PostModel] = try await APIService.shared.request(
                 endpoint: "/posts/\(username)/",
                 method: "GET",

@@ -91,11 +91,16 @@ struct EditProfile: View {
     }
     
     var body: some View {
+        let currentProfilePhoto = profilePhoto
+        let profilePhotoURL = URL(
+            string: APIConfig.current.baseURL + (auth.user?.profile.profilePhoto ?? "")
+        )
+        
         ZStack {
             List {
                 Section {
                     PhotosPicker(selection: $selectedItem, matching: .images) {
-                        if let chosen = profilePhoto {
+                        if let chosen = currentProfilePhoto {
                             Image(uiImage: chosen)
                                 .resizable()
                                 .scaledToFit()
@@ -104,9 +109,7 @@ struct EditProfile: View {
                                 .frame(maxWidth: .infinity)
                         } else {
                             AsyncImage(
-                                url: URL(
-                                    string: APIConfig.current.baseURL + (auth.user?.profile.profilePhoto ?? "")
-                                )
+                                url: profilePhotoURL
                             ) {image in
                                 image
                                     .resizable()

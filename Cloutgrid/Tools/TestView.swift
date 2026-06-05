@@ -8,36 +8,23 @@
 import SwiftUI
 import WebKit
 
+struct LegacyWebView: UIViewRepresentable {
+    let url: URL
+
+    func makeUIView(context: Context) -> WKWebView {
+        return WKWebView()
+    }
+
+    func updateUIView(_ uiView: WKWebView, context: Context) {
+        let request = URLRequest(url: url)
+        uiView.load(request)
+    }
+}
 
 struct TestView: View {
-    @State private var animationOffset: CGFloat = -1
- 
     var body: some View {
-        GeometryReader { geometry in
-            RoundedRectangle(cornerRadius: 4)
-                .fill(Color.gray.opacity(0.3))
-                .overlay(
-                    Rectangle()
-                        .fill(
-                            LinearGradient(
-                                colors: [
-                                    Color.clear,
-                                    Color.white.opacity(0.7),
-                                    Color.clear
-                                ],
-                                startPoint: .leading,
-                                endPoint: .trailing
-                            )
-                        )
-                        .offset(x: animationOffset * geometry.size.width)
-                )
-                .clipped()
-        }
-        .onAppear {
-            withAnimation(.linear(duration: 1.5).repeatForever(autoreverses: false)) {
-                animationOffset = 2
-            }
-        }
+        LegacyWebView(url: URL(string: "https://www.apple.com")!)
+            .edgesIgnoringSafeArea(.bottom)
     }
 }
 

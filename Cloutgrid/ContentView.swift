@@ -6,30 +6,25 @@
 //
 
 import SwiftUI
+import Combine
 
 enum TabIdentifier {
     case home, search, post, jobs, profile
 }
 
-struct TabButton: View {
-    let image: String
-    let target: TabIdentifier
-    @Binding var selected: TabIdentifier
-    
-    var body: some View {
-        Button {
-            selected = target
-        } label: {
-            Image(systemName: selected == target ? image == "magnifyingglass" ? "magnifyingglass" : "\(image).fill" : image)
-                .font(.system(size: 20))
-                .foregroundColor(selected == target ? .second : .first)
-                .frame(width: 44, height: 44)
-        }
-    }
+enum ProfileActions {
+    case connectInstagram
+    case connectYoutube
+}
+
+class DeepLinkManager: ObservableObject {
+    @Published var profileAction: ProfileActions? = nil
 }
 
 struct ContentView: View {
     @Environment(AuthManager.self) private var auth
+    
+    @EnvironmentObject var deepLinkManager: DeepLinkManager
     
     @State private var selectedTab: TabIdentifier = .home
     @State private var path = NavigationPath()
@@ -73,6 +68,35 @@ struct ContentView: View {
         }
     }
     
+    private func handleIncomingURL(_ url: URL) {
+        guard url.scheme == "cloutgrid" else {
+            return
+        }
+        
+        if url.host == "profile" {
+            selectedTab = .profile
+            
+            guard let components = URLComponents(url: url, resolvingAgainstBaseURL: false),
+                  let queryItems = components.queryItems else {
+                return
+            }
+            
+            if let instagramStatus = queryItems.first(where: { $0.name == "instagram" })?.value {
+                if instagramStatus == "connected" {
+                    deepLinkManager.profileAction = .connectInstagram
+                    return
+                }
+            }
+            
+            if let youtubeStatus = queryItems.first(where: { $0.name == "youtube" })?.value {
+                if youtubeStatus == "connected" {
+                    deepLinkManager.profileAction = .connectYoutube
+                    return
+                }
+            }
+        }
+    }
+    
     var body: some View {
         ZStack(alignment: .top) {
             if auth.isAuth {
@@ -84,26 +108,26 @@ struct ContentView: View {
                             notificationSheet: $notificationSheet,
                             scrollY: $homeScrollY
                         )
-                        .tabItem {
-                            Label("", systemImage: "house")
-                        }
-                        .tag(TabIdentifier.home)
+                            .tabItem {
+                                Label("", systemImage: "house")
+                            }
+                            .tag(TabIdentifier.home)
                         
                         SearchView(selectedTab: $selectedTab, searchPath: $path)
-                        .tabItem { Label("", systemImage: "magnifyingglass") }
-                        .tag(TabIdentifier.search)
+                            .tabItem { Label("", systemImage: "magnifyingglass") }
+                            .tag(TabIdentifier.search)
                         
                         CreateView(selectedTab: $selectedTab, createPath: $path)
-                        .tabItem { Label("", systemImage: "plus.circle") }
-                        .tag(TabIdentifier.post)
+                            .tabItem { Label("", systemImage: "plus.circle") }
+                            .tag(TabIdentifier.post)
                         
                         JobView(jobPath: $path)
-                        .tabItem { Label("", systemImage: "briefcase") }
-                        .tag(TabIdentifier.jobs)
+                            .tabItem { Label("", systemImage: "briefcase") }
+                            .tag(TabIdentifier.jobs)
                         
                         ProfileView(profilePath: $path)
-                        .tabItem { Label("", systemImage: "person.circle") }
-                        .tag(TabIdentifier.profile)
+                            .tabItem { Label("", systemImage: "person.circle") }
+                            .tag(TabIdentifier.profile)
                     }
                     .tint(Color.second)
                     .navigationTitle(currentTitle)
@@ -198,8 +222,28 @@ struct ContentView: View {
             }
         }
         .animation(.spring(), value: toast.show)
+        .onOpenURL { url in
+            handleIncomingURL(url)
+        }
     }
 }
+
+//struct TabButton: View {
+//    let image: String
+//    let target: TabIdentifier
+//    @Binding var selected: TabIdentifier
+//    
+//    var body: some View {
+//        Button {
+//            selected = target
+//        } label: {
+//            Image(systemName: selected == target ? image == "magnifyingglass" ? "magnifyingglass" : "\(image).fill" : image)
+//                .font(.system(size: 20))
+//                .foregroundColor(selected == target ? .second : .first)
+//                .frame(width: 44, height: 44)
+//        }
+//    }
+//}
 
 //struct ContentView: View {
 //    @Environment(AuthManager.self) private var auth
@@ -343,5 +387,6 @@ struct ContentView: View {
         .environment(ProfileManager())
         .environment(JobManager())
         .environment(SearchManager())
+        .environmentObject(DeepLinkManager())
 }
 
