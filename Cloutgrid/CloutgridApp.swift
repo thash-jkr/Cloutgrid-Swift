@@ -23,6 +23,7 @@ struct CloutgridApp: App {
                 .environment(profileManager)
                 .environment(jobManager)
                 .environment(searchManager)
+                .environment(IntegrationManager())
                 .environmentObject(DeepLinkManager())
         }
     }

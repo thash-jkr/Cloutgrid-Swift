@@ -12,7 +12,7 @@ struct BrowserView: View {
     var url: URL
     
     private func webContent(url: URL) -> some View {
-        NavigationStack {
+        VStack {
             if #available(iOS 26.0, *) {
                 WebView(url: url)
                     .ignoresSafeArea(edges: .bottom)

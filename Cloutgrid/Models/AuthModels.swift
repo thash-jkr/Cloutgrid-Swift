@@ -11,8 +11,8 @@ struct UserContainer: Codable, Hashable {
     var profile: UserProfile
     
     let area: String?
-    let instagramConnected: Bool?
-    let youtubeConnected: Bool?
+    var instagramConnected: Bool?
+    var youtubeConnected: Bool?
     
     let targetAudience: String?
     let website: String?

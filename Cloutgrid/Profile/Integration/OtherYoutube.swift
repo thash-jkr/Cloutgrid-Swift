@@ -11,7 +11,7 @@ struct OtherYoutube: View {
     var username: String
     
     var body: some View {
-        VStack(spacing: 10) {
+        ScrollView {
             Image("Graph")
                 .resizable()
                 .aspectRatio(contentMode: .fit)

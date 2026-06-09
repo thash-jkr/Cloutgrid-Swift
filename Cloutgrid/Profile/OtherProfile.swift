@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import Awesome
 
 struct OtherProfile: View {
     @Environment(ProfileManager.self) private var profile
@@ -17,6 +18,14 @@ struct OtherProfile: View {
     @State var optionSheet: Bool = false
     @State private var showBlockAlert: Bool = false
     @State private var unFollowConfirm: Bool = false
+    @State private var selectedIntegration: CurrentIntegration? = nil
+    
+    enum CurrentIntegration: String, Identifiable {
+        case instagram
+        case youtube
+        
+        var id: String { self.rawValue }
+    }
     
     enum CurrentTab: String {
         case posts
@@ -37,11 +46,47 @@ struct OtherProfile: View {
     
     private func tabButton(for tab: CurrentTab) -> some View {
         Button {
-            selectedTab = tab
+            if tab == .instagram {
+                selectedIntegration = .instagram
+            } else if tab == .youtube {
+                selectedIntegration = .youtube
+            } else {
+                selectedTab = tab
+            }
         } label: {
-            Image(systemName: iconName(for: tab))
-                .font(.system(size: 20))
-                .foregroundStyle(selectedTab == tab ? Color.second : Color.first)
+            if tab == .instagram {
+                HStack(spacing: 0) {
+                    Awesome.Brand.instagram.image
+                        .size(30)
+                        .foregroundColor(selectedTab == tab ? .second : .first)
+                    
+                    if profile.otherProfile?.instagramConnected ?? false {
+                        Image(systemName: "checkmark.circle.fill")
+                            .foregroundStyle(.green)
+                    } else {
+                        Image(systemName: "exclamationmark.circle.fill")
+                            .foregroundStyle(.gray)
+                    }
+                }
+            } else if tab == .youtube {
+                HStack(spacing: 0) {
+                    Awesome.Brand.youtube.image
+                        .size(30)
+                        .foregroundColor(selectedTab == tab ? .second : .first)
+                    
+                    if profile.otherProfile?.youtubeConnected ?? false {
+                        Image(systemName: "checkmark.circle.fill")
+                            .foregroundStyle(.green)
+                    } else {
+                        Image(systemName: "exclamationmark.circle.fill")
+                            .foregroundStyle(.gray)
+                    }
+                }
+            } else {
+                Image(systemName: iconName(for: tab))
+                    .font(.system(size: 20))
+                    .foregroundStyle(selectedTab == tab ? Color.second : Color.first)
+            }
         }
         .frame(maxWidth: .infinity)
     }
@@ -152,23 +197,11 @@ struct OtherProfile: View {
                 blockedView(blocker: true)
             } else {
                 ScrollView {
-                    ProfileHeader(
-                        user: profile.otherProfile ?? PostModel.creatorPreview
-                    )
-                    
-//                    HStack {
-//                        Button {
-//                            
-//                        } label: {
-//                            Text(
-//                                profile.otherProfile?.isFollowing ?? false ? "Unfollow" : "Follow"
-//                            )
-//                                .customButton()
-//                        }
-//                        .padding(.leading)
-//                        
-//                        Spacer()
-//                    }
+                    if let user = profile.otherProfile {
+                        ProfileHeader(
+                            user: user
+                        )
+                    }
                     
                     tabPicker
                     
@@ -176,14 +209,6 @@ struct OtherProfile: View {
                         PostGrid(posts: profile.otherPosts, path: $path)
                             .opacity(selectedTab == .posts ? 1 : 0)
                             .allowsHitTesting(selectedTab == .posts)
-                        
-                        OtherInstagram(username: username)
-                            .opacity(selectedTab == .instagram ? 1 : 0)
-                            .allowsHitTesting(selectedTab == .instagram)
-                        
-                        OtherYoutube(username: username)
-                            .opacity(selectedTab == .youtube ? 1 : 0)
-                            .allowsHitTesting(selectedTab == .youtube)
                         
                         PostGrid(posts: profile.otherCollabs, path: $path)
                             .opacity(selectedTab == .collabs ? 1 : 0)
@@ -246,15 +271,36 @@ struct OtherProfile: View {
                 await profile.fetchCollabs(username: username, other: true)
             }
         }
+        .sheet(item: $selectedIntegration) { integration in
+            NavigationStack {
+                switch integration {
+                case .instagram:
+                    if let user = profile.otherProfile {
+                        OtherInstagram(user: user)
+                            .navigationTitle("Instagram Insights 📸")
+                            .navigationBarTitleDisplayMode(.inline)
+                    }
+                case .youtube:
+                    OtherYoutube(username: username)
+                        .navigationTitle("YouTube Analytics 📊")
+                        .navigationBarTitleDisplayMode(.inline)
+                }
+            }
+            .presentationDetents([.fraction(0.7) ,.fraction(1)])
+            .presentationDragIndicator(.visible)
+        }
     }
 }
 
 #Preview {
     NavigationStack {
         OtherProfile(
-            username: "business1",
-            type: "business",
+            username: "creator1",
+            type: "creator",
             path: .constant(NavigationPath())
-        ).environment(ProfileManager())
+        )
+        .environment(ProfileManager())
+        .environment(AuthManager())
+        .environment(IntegrationManager())
     }
 }

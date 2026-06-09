@@ -9,12 +9,7 @@ import SwiftUI
 
 struct Youtube: View {
     var body: some View {
-        VStack {
-            Text("YouTube Analytics 📊")
-                .font(.title2)
-                .bold()
-                .padding(.bottom)
-            
+        ScrollView {
             VStack {
                 Button {
                     
@@ -30,13 +25,12 @@ struct Youtube: View {
             .padding(.bottom)
             
             YoutubeConstants()
-            
-            Spacer()
         }
-        .padding(.horizontal, 10)
     }
 }
 
 #Preview {
-    Youtube()
+    NavigationStack {
+        Youtube()
+    }
 }

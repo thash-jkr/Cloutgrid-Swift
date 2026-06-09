@@ -85,6 +85,7 @@ struct InstagramConstant: View {
                 BulletPoint("Grant the requested permissions (needed to pull your analytics securely).")
             }
         }
+        .padding(.horizontal)
     }
 }
 
@@ -115,5 +116,6 @@ struct YoutubeConstants: View {
                 BulletPoint("Grant the requested permissions so we can securely display your analytics to potential partners.")
             }
         }
+        .padding(.horizontal)
     }
 }
