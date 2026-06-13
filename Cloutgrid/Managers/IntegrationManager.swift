@@ -12,6 +12,9 @@ class IntegrationManager {
     var instagramPage: InstagramPageModel?
     var instagramMedia: [InstagramMediaModel] = []
     
+    var youtubeChannel: YoutubeChannelModel?
+    var youtubeMedia: [YoutubeMediaModel] = []
+    
     var isLoading: Bool = false
     var errorMessage: String?
     
@@ -212,6 +215,130 @@ class IntegrationManager {
             self.isLoading = false
             self.errorMessage = error.localizedDescription
             print(error)
+        }
+    }
+    
+    @MainActor
+    func fetchYoutubeChannel() async {
+        self.isLoading = true
+        self.errorMessage = nil
+        
+        do {
+            let _: EmptyResponse = try await APIService.shared.request(
+                endpoint: "/youtube/channel/fetch/",
+                method: "POST",
+                body: [:],
+                requireAuth: true
+            )
+            
+            ToastManager.shared
+                .showToast(
+                    message: "YouTube channel details fetched successfully",
+                    isSuccess: true
+                )
+        } catch APIError.serverError(let message) {
+            self.errorMessage = message
+            self.isLoading = false
+            
+            ToastManager.shared
+                .showToast(
+                    message: "Error: \(errorMessage ?? Constants.errorText)",
+                    isSuccess: false
+                )
+        } catch {
+            self.isLoading = false
+            self.errorMessage = error.localizedDescription
+        }
+    }
+    
+    @MainActor
+    func readYoutubeChannel(username: String) async {
+        self.isLoading = true
+        self.errorMessage = nil
+        
+        do {
+            let response: YoutubeChannelResppnse = try await APIService.shared.request(
+                endpoint: "/youtube/channel/read/\(username)/",
+                method: "GET",
+                body: nil,
+                requireAuth: true
+            )
+            
+            self.youtubeChannel = response.channelData
+        } catch APIError.serverError(let message) {
+            self.errorMessage = message
+            self.isLoading = false
+            
+            ToastManager.shared
+                .showToast(
+                    message: "Error: \(errorMessage ?? Constants.errorText)",
+                    isSuccess: false
+                )
+        } catch {
+            self.isLoading = false
+            self.errorMessage = error.localizedDescription
+        }
+    }
+    
+    @MainActor
+    func fetchYoutubeMedia() async {
+        self.isLoading = true
+        self.errorMessage = nil
+        
+        do {
+            let _: EmptyResponse = try await APIService.shared.request(
+                endpoint: "/youtube/media/fetch/",
+                method: "POST",
+                body: [:],
+                requireAuth: true
+            )
+            
+            ToastManager.shared
+                .showToast(
+                    message: "YouTube media details fetched successfully",
+                    isSuccess: true
+                )
+        } catch APIError.serverError(let message) {
+            self.errorMessage = message
+            self.isLoading = false
+            
+            ToastManager.shared
+                .showToast(
+                    message: "Error: \(errorMessage ?? Constants.errorText)",
+                    isSuccess: false
+                )
+        } catch {
+            self.isLoading = false
+            self.errorMessage = error.localizedDescription
+        }
+    }
+    
+    @MainActor
+    func readYoutubeMedia(username: String) async {
+        self.isLoading = true
+        self.errorMessage = nil
+        
+        do {
+            let response: YoutubeMediaResponse = try await APIService.shared.request(
+                endpoint: "/youtube/media/read/\(username)/",
+                method: "GET",
+                body: nil,
+                requireAuth: true
+            )
+            
+            self.youtubeMedia = response.data
+        } catch APIError.serverError(let message) {
+            self.errorMessage = message
+            self.isLoading = false
+            
+            ToastManager.shared
+                .showToast(
+                    message: "Error: \(errorMessage ?? Constants.errorText)",
+                    isSuccess: false
+                )
+        } catch {
+            self.isLoading = false
+            self.errorMessage = error.localizedDescription
         }
     }
 }

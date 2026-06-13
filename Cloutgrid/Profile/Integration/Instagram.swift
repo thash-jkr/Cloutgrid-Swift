@@ -55,6 +55,21 @@ struct MediaRow: View {
     var integration: IntegrationManager
     var type: String
     
+    private func getIconName(for metricName: String) -> String {
+        switch metricName.lowercased() {
+        case "engagement":
+            return "chart.line.uptrend.xyaxis"
+        case "impressions", "views":
+            return "eye"
+        case "reach":
+            return "chart.line.uptrend.xyaxis"
+        case "saves":
+            return "bookmark"
+        default:
+            return "chart.bar"
+        }
+    }
+    
     var body: some View {
         VStack {
             Text(type == "IMAGE" ? "Top Posts" : "Top Reels")
@@ -105,14 +120,15 @@ struct MediaRow: View {
                                         Text("\(media.likeCount)").bold()
                                     }
                                     
-                                    HStack(spacing: 0) {
-                                        Image(systemName: "chart.line.uptrend.xyaxis")
-                                        Text("\(media.insights[0].values[0].value)").bold()
-                                    }
-                                    
-                                    HStack(spacing: 0) {
-                                        Image(systemName: "eye")
-                                        Text("\(media.insights[1].values[0].value)").bold()
+                                    ForEach(media.insights) { insight in
+                                        HStack(spacing: 0) {
+                                            Image(systemName: getIconName(for: insight.name))
+                                            
+                                            ForEach(insight.values) { insightValue in
+                                                Text("\(insightValue.value)")
+                                                    .bold()
+                                            }
+                                        }
                                     }
                                 }
                                 .padding(.horizontal, 7)
@@ -163,7 +179,7 @@ struct Instagram: View {
             if auth.user?.instagramConnected ?? false {
                 VStack {
                     if let instagramProfile = integration.instagramPage {
-                        HStack {
+                        HStack(alignment: .top) {
                             VStack {
                                 AsyncImage(
                                     url: URL(
@@ -194,9 +210,26 @@ struct Instagram: View {
                             Spacer()
                             
                             VStack(alignment: .trailing, spacing: 10) {
-                                Text("\(instagramProfile.followers) Followers")
-                                Text("\(instagramProfile.followings) Followings")
-                                Text("\(instagramProfile.mediaCount) Posts")
+                                HStack {
+                                    Text("\(instagramProfile.followers)")
+                                        .bold()
+                                    Text("Followers")
+                                        .foregroundStyle(.secondary)
+                                }
+                                
+                                HStack {
+                                    Text("\(instagramProfile.followings)")
+                                        .bold()
+                                    Text("Followings")
+                                        .foregroundStyle(.secondary)
+                                }
+                                
+                                HStack {
+                                    Text("\(instagramProfile.mediaCount)")
+                                        .bold()
+                                    Text("Posts")
+                                        .foregroundStyle(.secondary)
+                                }
                             }
                             .frame(
                                 maxWidth: .infinity,
@@ -240,56 +273,56 @@ struct Instagram: View {
             }
         }
         .toolbar {
-            ToolbarItem(placement: .topBarTrailing) {
-                Menu {
-                    Button {
-                        Task {
-                            await integration.fetchInstagramProfile()
-                            await integration.fetchInstagramMedia()
-                            
-                            if let user = auth.user {
+            if let user = auth.user, user.instagramConnected ?? false {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Menu {
+                        Button {
+                            Task {
+                                await integration.fetchInstagramProfile()
                                 await integration
                                     .readInstagramProfile(
                                         username: user.profile
                                             .username)
+                                
+                                await integration.fetchInstagramMedia()                                
                                 await integration
                                     .readInstagramMedia(
                                         username: user.profile.username
                                     )
                             }
-                        }
-                    } label: {
-                        Label("Sync Profile", systemImage: "arrow.trianglehead.2.clockwise.rotate.90")
-                    }
-                    
-                    Button {
-                        
-                    } label: {
-                        Label("Check connection", systemImage: "wifi.exclamationmark")
-                    }
-                    
-
-                    Section {
-                        Button(role: .destructive) {
-                            purgeConfirm = true
                         } label: {
-                            Label("Disconnect", systemImage: "trash")
+                            Label("Sync Profile", systemImage: "arrow.trianglehead.2.clockwise.rotate.90")
                         }
-                    }
-                } label: {
-                    Image(systemName: "ellipsis")
-                }
-                .confirmationDialog(
-                    "Are you sure you want to disconnect your Instagram integration and purge all your data?",
-                    isPresented: $purgeConfirm,
-                    titleVisibility: .visible
-                ) {
-                    Button(role: .destructive) {
-                        Task {
-                            await integration.disconnectInstagram(auth: auth)
+                        
+                        Button {
+                            
+                        } label: {
+                            Label("Check connection", systemImage: "wifi.exclamationmark")
+                        }
+                        
+
+                        Section {
+                            Button(role: .destructive) {
+                                purgeConfirm = true
+                            } label: {
+                                Label("Disconnect", systemImage: "trash")
+                            }
                         }
                     } label: {
-                        Text("Purge")
+                        Image(systemName: "ellipsis")
+                    }
+                    .confirmationDialog(
+                        "Are you sure you want to disconnect your Instagram integration and purge all your data?",
+                        isPresented: $purgeConfirm,
+                        titleVisibility: .visible
+                    ) {
+                        Button(role: .destructive) {
+                            Task {
+                                await integration.disconnectInstagram(auth: auth)
+                            }
+                        } label: {
+                            Text("Purge")
+                        }
                     }
                 }
             }

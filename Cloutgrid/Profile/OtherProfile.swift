@@ -61,11 +61,13 @@ struct OtherProfile: View {
                         .foregroundColor(selectedTab == tab ? .second : .first)
                     
                     if profile.otherProfile?.instagramConnected ?? false {
-                        Image(systemName: "checkmark.circle.fill")
+                        Image(systemName: "checkmark.circle")
                             .foregroundStyle(.green)
+                            .bold()
                     } else {
-                        Image(systemName: "exclamationmark.circle.fill")
-                            .foregroundStyle(.gray)
+                        Image(systemName: "exclamationmark.circle")
+                            .foregroundStyle(.red)
+                            .bold()
                     }
                 }
             } else if tab == .youtube {
@@ -75,11 +77,13 @@ struct OtherProfile: View {
                         .foregroundColor(selectedTab == tab ? .second : .first)
                     
                     if profile.otherProfile?.youtubeConnected ?? false {
-                        Image(systemName: "checkmark.circle.fill")
+                        Image(systemName: "checkmark.circle")
                             .foregroundStyle(.green)
+                            .bold()
                     } else {
-                        Image(systemName: "exclamationmark.circle.fill")
-                            .foregroundStyle(.gray)
+                        Image(systemName: "exclamationmark.circle")
+                            .foregroundStyle(.red)
+                            .bold()
                     }
                 }
             } else {
@@ -281,9 +285,11 @@ struct OtherProfile: View {
                             .navigationBarTitleDisplayMode(.inline)
                     }
                 case .youtube:
-                    OtherYoutube(username: username)
-                        .navigationTitle("YouTube Analytics 📊")
-                        .navigationBarTitleDisplayMode(.inline)
+                    if let user = profile.otherProfile {
+                        OtherYoutube(user: user)
+                            .navigationTitle("YouTube Analytics 📊")
+                            .navigationBarTitleDisplayMode(.inline)
+                    }
                 }
             }
             .presentationDetents([.fraction(0.7) ,.fraction(1)])

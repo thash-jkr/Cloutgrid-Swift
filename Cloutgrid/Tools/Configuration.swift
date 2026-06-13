@@ -11,7 +11,7 @@ enum APIConfig {
     case development
     case production
     
-    static let current: APIConfig = .development
+    static let current: APIConfig = .production
     
     var baseURL: String {
         switch self {

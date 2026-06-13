@@ -59,11 +59,13 @@ struct ProfileView: View {
                         .foregroundColor(selectedTab == tab ? .second : .first)
                     
                     if auth.user?.instagramConnected ?? false {
-                        Image(systemName: "checkmark.circle.fill")
+                        Image(systemName: "checkmark.circle")
                             .foregroundStyle(.green)
+                            .bold()
                     } else {
-                        Image(systemName: "exclamationmark.circle.fill")
-                            .foregroundStyle(.gray)
+                        Image(systemName: "exclamationmark.circle")
+                            .foregroundStyle(.red)
+                            .bold()
                     }
                 }
             } else if tab == .youtube {
@@ -73,11 +75,13 @@ struct ProfileView: View {
                         .foregroundColor(selectedTab == tab ? .second : .first)
                     
                     if auth.user?.youtubeConnected ?? false {
-                        Image(systemName: "checkmark.circle.fill")
+                        Image(systemName: "checkmark.circle")
                             .foregroundStyle(.green)
+                            .bold()
                     } else {
-                        Image(systemName: "exclamationmark.circle.fill")
-                            .foregroundStyle(.gray)
+                        Image(systemName: "exclamationmark.circle")
+                            .foregroundStyle(.red)
+                            .bold()
                     }
                 }
             } else {
@@ -128,7 +132,7 @@ struct ProfileView: View {
                     }
                     
                     if auth.user?.instagramConnected ?? false {
-                        Image(systemName: "checkmark.circle.fill")
+                        Image(systemName: "checkmark.circle")
                             .symbolRenderingMode(.multicolor)
                     }
                 }
@@ -295,6 +299,20 @@ struct ProfileView: View {
                 }
             } else if newValue == .connectYoutube {
                 selectedIntegration = .youtube
+                
+                Task {
+                    await integration.fetchYoutubeChannel()
+                    await integration.fetchYoutubeMedia()
+                    
+                    if let user = auth.user {
+                        await integration
+                            .readYoutubeChannel(
+                                username: user.profile.username
+                            )
+                        await integration
+                            .readYoutubeMedia(username: user.profile.username)
+                    }
+                }
                 
                 DispatchQueue.main.async {
                     deepLinkManager.profileAction = nil

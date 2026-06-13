@@ -148,6 +148,14 @@ struct ContentView: View {
                                         }
                                     }
                             }
+                            
+//                            ToolbarItem(placement: .topBarTrailing) {
+//                                Button {
+//                                    path.append("edit")
+//                                } label: {
+//                                    Image(systemName: "message")
+//                                }
+//                            }
                         }
                         
                         if selectedTab == .profile {

@@ -29,7 +29,8 @@ struct InstagramPageModel: Codable, Identifiable {
     }
 }
 
-struct InsightValue: Codable {
+struct InsightValue: Codable, Identifiable {
+    var id: UUID { UUID() }
     let value: Int
 }
 
@@ -85,6 +86,47 @@ struct MediaInsightModel: Codable, Identifiable {
     let values: [InsightValue]
 }
 
+struct YoutubeChannelModel: Codable {
+    let id: Int
+    let title: String
+    let channelId: String
+    let description: String
+    let profilePicture: String
+    let banner: String
+    let subscriberCount: Int
+    let viewCount: Int
+    let videoCount: Int
+    
+    enum CodingKeys: String, CodingKey {
+        case id, title, description
+        
+        case channelId = "channel_id"
+        case profilePicture = "profile_picture_url"
+        case banner = "banner_url"
+        case subscriberCount = "subscriber_count"
+        case viewCount = "view_count"
+        case videoCount = "video_count"
+    }
+}
+
+struct YoutubeMediaModel: Codable, Identifiable {
+    let id: Int
+    let mediaId: String
+    let title: String
+    let description: String
+    let thumbnail: String
+    let views: Int
+    let likes: Int
+    let comments: Int
+    
+    enum CodingKeys: String, CodingKey {
+        case id, title, description, views, likes, comments
+        
+        case mediaId = "media_id"
+        case thumbnail = "thumbnail_url"
+    }
+}
+
 struct InstagramResponseModel: Codable {
     let fb_page: String
     let ig_page: String
@@ -100,4 +142,20 @@ struct InstagramPageResponse: Codable {
 
 struct InstagramMediaResponse: Codable {
     let media: [InstagramMediaModel]
+}
+
+struct YoutubeChannelResppnse: Codable {
+    let channelData: YoutubeChannelModel
+    
+    enum CodingKeys: String, CodingKey {
+        case channelData = "channel_data"
+    }
+}
+
+struct YoutubeMediaResponse: Codable {
+    let data: [YoutubeMediaModel]
+    
+    enum CodingKeys: String, CodingKey {
+        case data = "media_data"
+    }
 }
